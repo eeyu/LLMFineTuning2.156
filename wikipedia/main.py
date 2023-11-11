@@ -121,13 +121,13 @@ def get_n_links_from_page_with_depth(page, n, exploit_explore_ratio=0.5, max_dep
     links_d, _ = get_n_links_from_page(page, n_direct_links)
     links = links_d + links_c
 
-    for l in links:
-        save_page("", l, index=save_index)
+    for link in links:
+        save_page("", link, index=save_index)
     if cur_depth + 1 == max_depth:
         return
     else:
-        for l in links:
-            get_n_links_from_page_with_depth(l, n, exploit_explore_ratio, max_depth, cur_depth + 1, save_index)
+        for link in links:
+            get_n_links_from_page_with_depth(link, n, exploit_explore_ratio, max_depth, cur_depth + 1, save_index)
 
 
 if __name__ == "__main__":

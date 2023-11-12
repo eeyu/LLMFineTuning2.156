@@ -52,6 +52,7 @@ def analyze_text(text: str) -> TextAnalytics:
 def analyze_file(file_name: str | None = None) -> TextAnalytics:
     if file_name is None:
         file_name = paths.select_file(paths.WIKIPEDIA_DATA_PATH, choose_file=True)
+    # print(file_name)
     with open(file_name, 'r') as f:
         text = f.read()
         return analyze_text(text)
@@ -59,6 +60,7 @@ def analyze_file(file_name: str | None = None) -> TextAnalytics:
 def analyze_folder(folder_name: str | None = None) -> FolderAnalytics:
     if folder_name is None:
         folder_name = paths.select_file(paths.WIKIPEDIA_DATA_PATH, choose_file=False)
+    print(folder_name)
 
     # First get list of all files within this folder.
     file_names = [f.path for f in os.scandir(folder_name) if f.name.endswith("txt")]
@@ -75,10 +77,12 @@ def analyze_folder(folder_name: str | None = None) -> FolderAnalytics:
         folder_analytics.combine(analyze_folder(subfolder))
 
     # Save this in a file at the selected folder.
-    with open(folder_name + "/analytics.out", "w") as f:
+    analytics_path = folder_name + "/.analytics"
+    with open(analytics_path, "w") as f:
         f.write("num texts: " + str(folder_analytics.num_texts))
         f.write("\nnum tokens: " + str(folder_analytics.analytics.num_tokens))
         f.write('\n\n' + folder_analytics.analytics.get_histogram_as_string())
+        print("analytics saved at: ", analytics_path)
 
     # Return combined analytics
     return folder_analytics

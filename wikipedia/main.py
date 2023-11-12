@@ -16,6 +16,7 @@ def get_n_links_from_page(page, n):
 
     n_links = []
     titles = []
+    n = min(n, len(link_titles))
     for i in range(n):
         page = links[link_titles[i]]
         n_links.append(page)
@@ -135,7 +136,9 @@ if __name__ == "__main__":
                                        'en',
                                        extract_format=wikipediaapi.ExtractFormat.WIKI)
 
-    origin_page_titles = ['Technical standard', 'IEEE Standards Association', 'List of technical standard organizations']
+    origin_page_titles = ['Technical standard', 'IEEE Standards Association', 'List of technical standard organizations',
+                          'ASME',
+                          'International Organization for Standardization', 'List of ISO standards']
 
     now = datetime.datetime.now()
     save_index = now.strftime('%h_%m_%s')
@@ -144,5 +147,5 @@ if __name__ == "__main__":
         p_wiki = wiki_wiki.page(title)
         print("Origin Page - Summary: %s" % p_wiki.summary[0:60])
 
-        get_n_links_from_page_with_depth(page=p_wiki, n=7, exploit_explore_ratio=0.5, max_depth=2, cur_depth=0, save_index=save_index)
+        get_n_links_from_page_with_depth(page=p_wiki, n=90, exploit_explore_ratio=0.6, max_depth=2, cur_depth=0, save_index=save_index)
 

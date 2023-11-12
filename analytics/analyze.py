@@ -2,9 +2,14 @@ from dataclasses import dataclass
 import collections
 import re
 import os
+import io
 
 import paths
 import tokenizer
+import pandas as pd
+import matplotlib.pyplot as plt
+from itertools import islice
+
 
 
 @dataclass
@@ -87,8 +92,42 @@ def analyze_folder(folder_name: str | None = None) -> FolderAnalytics:
     # Return combined analytics
     return folder_analytics
 
+# Find a way to do this directly with the .analytics file
+def display_analytics(analytics: FolderAnalytics | TextAnalytics | None = None):
+    if isinstance(analytics, FolderAnalytics):
+        histogram = analytics.analytics.token_histogram
+    elif isinstance(analytics, TextAnalytics):
+        histogram = analytics.token_histogram
+    else:
+        filename = paths.select_file(init_dir=paths.WIKIPEDIA_DATA_PATH, choose_file=True)
+        histogram = convert_file_to_histogram(filename)
+    df = pd.DataFrame({'category': list(histogram.keys()),
+                       'number': list(histogram.values())})
+    df.set_index('category', inplace=True)
+    df.sort_values('number', inplace=True)
+    df.plot(y='number', kind='bar', legend=False)
+    plt.show()
+
+# This is messy
+def convert_file_to_histogram(filename: str):
+    line_count = 0
+    hist = {}
+    with io.open(filename, 'r') as f:
+        for line in f:
+            if line_count > 2:
+                splits = line.split()
+                key = splits[0]
+                count = int(splits[1])
+                hist[key] = count
+            line_count += 1
+    hist = dict(sorted(hist.items(), key=lambda item: item[1]))
+    return hist
+
+
 
 if __name__ == "__main__":
+
+    ## This is the example test
     # text1 = "Canada Oil and Gas Operations Act ( R.S., 1985, c. O-7 )\n\n The following are numbers: 1.42, -3, 483, 1E-4, -23.1"
     # text2 = "BSI created one of the world's first quality marks in 1903, when the letters 'B' and 'S' (for British Standard) were combined with V (for verification) to produce the Kitemark logo."
     # analytics1 = analyze_text(text1)
@@ -96,11 +135,17 @@ if __name__ == "__main__":
     #
     # analytics1.combine(analytics2)
     # analytics1.print_histogram()
+    # display_analytics(analytics1)
 
+    ## This analyzes a file
     # file_text_analytics = analyze_file()
     # file_text_analytics.print_histogram()
 
+    # This analyzes a folder
     folder_analytics = analyze_folder()
-    # folder_analytics.print_histogram()
     print("num texts: ", folder_analytics.num_texts)
     print("num tokens: ", folder_analytics.analytics.num_tokens)
+
+    # display_analytics()
+
+

@@ -81,6 +81,7 @@ def split_word(orig_word):
 
 if __name__ == "__main__":
     # text = "Several mathematical operations are provided for combining Counter objects to produce multisets (counters that have counts greater than zero). Addition and subtraction combine counters by adding or subtracting the counts of corresponding elements."
-    text = "Canada Oil and Gas Operations Act ( R.S., 1985, c. O-7 )\n\n The following are numbers: 1.42, -3, 483, 1E-4, -23.1. This is a newline test.\nHello. asdf"
+    text = "Canada Oil and Gas Operations Act (R.S., 1985, c. O-7)\n\n The following are numbers: 1.42, -3, 483, 1E-4, -23.1. This is a newline test.\nHello. asdf"
     splits = split_text(text)
+    print(repr(text))
     print(splits)

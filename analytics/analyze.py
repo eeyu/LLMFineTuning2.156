@@ -1,88 +1,90 @@
 from dataclasses import dataclass
 import collections
 import re
+import os
 
-PUNCTUATION = [",", ";", "!", "?", "(", ")", "{", "}", "[", "]"]
-confusing_punctuation = [".", "/"]
-token_separators = [" ", "\n"]
+import paths
+import tokenizer
 
-#Things to look at:
-# punctuation
-# each token is within a whitespace
-# math. symbols, operators
+
 @dataclass
-class StringAnalytics:
+class TextAnalytics:
     num_tokens: int
     token_histogram: collections.Counter
 
+    def __init__(self, splits=None):
+        if splits is None:
+            splits = []
+        self.token_histogram = collections.Counter(splits)
+        self.num_tokens = len(self.token_histogram)
+
     def print_histogram(self):
         for token, count in self.token_histogram.items():
-            print(token, count)
+            print(repr(token), count)
 
+    def combine(self, analytics: 'TextAnalytics'):
+        self.token_histogram += analytics.token_histogram
+        self.num_tokens = len(self.token_histogram)
 
-def get_separator_index(string: str, separators: list) -> (str, int):
-    best_index = -1
-    best_separator = separators[0]
-    for separator in separators:
-        index = string.find(separator)
-        if best_index == -1 or (0 <= index < best_index):
-            best_index = index
-            best_separator = separator
-    return best_separator, best_index
+@dataclass
+class FolderAnalytics:
+    num_texts: int
+    analytics: TextAnalytics
 
-def split_string(orig_string):
-    string = (orig_string + '.')[:-1] # Create a copy
-    separator, end_index = get_separator_index(string, token_separators)
-    split = []
-    while end_index != -1:
-        # Extract that word from the string
-        word = string[:end_index]
-        string = string[end_index+1:]
+    def print_histogram(self):
+        self.analytics.print_histogram()
 
-        # Look at if need to subdivide the word
-        subsplits = split_word(word)
-
-        split.extend(subsplits)
-
-        end_index = string.find(" ")
-    split.extend(string)
-    return split
-
-def split_word(orig_word):
-    word = (orig_word + '.')[:-1] # Create a copy
-    split = []
-
-    separator, index = get_separator_index(word, PUNCTUATION + confusing_punctuation)
-    while index >= 0:
-        if index != 0:
-            first_split = word[:index]
-            split.append(first_split)
-
-        punctuation = word[index:index+1]
-        split.append(punctuation)
-
-        if index+1 <= len(word):
-            word = word[index+1:]
-
-        separator, index = get_separator_index(word, PUNCTUATION + confusing_punctuation)
-    if len(word) > 0:
-        split.append(word)
-    print(split)
-    return split
+    def combine(self, folder_analytics: 'FolderAnalytics'):
+        self.num_texts += folder_analytics.num_texts
+        self.analytics.combine(folder_analytics.analytics)
 
 # Analytics for a single page
-def analyze_string(string: str):
-    tokens = string.split()
-    num_tokens = len(tokens)
-    token_histogram = collections.Counter(tokens)
-    return StringAnalytics(num_tokens=num_tokens, token_histogram=token_histogram)
+def analyze_text(text: str) -> TextAnalytics:
+    tokens = tokenizer.split_text(text)
+    return TextAnalytics(tokens)
+
+def analyze_file(file_name: str | None = None) -> TextAnalytics:
+    if file_name is None:
+        file_name = paths.select_file(paths.WIKIPEDIA_DATA_PATH, choose_file=True)
+    with open(file_name, 'r') as f:
+        text = f.read()
+        return analyze_text(text)
+
+def analyze_folder(folder_name: str | None = None) -> FolderAnalytics:
+    if folder_name is None:
+        folder_name = paths.select_file(paths.WIKIPEDIA_DATA_PATH, choose_file=False)
+
+    # First get list of all files within this folder.
+    file_names = [f.path for f in os.scandir(folder_name) if f.is_file()]
+
+    # Then get analytics of this folder
+    text_analytics = TextAnalytics()
+    for file in file_names:
+        text_analytics.combine(analyze_file(file))
+    folder_analytics = FolderAnalytics(len(file_names), text_analytics)
+
+    # Then search for subfolders and get their analytics
+    subfolder_names = [f.path for f in os.scandir(folder_name) if f.is_dir() and f.name != paths.UNALTERED_FOLDER_NAME]
+    for subfolder in subfolder_names:
+        folder_analytics.combine(analyze_folder(subfolder))
+
+    # Return combined analytics
+    return folder_analytics
 
 
 if __name__ == "__main__":
-    # text = "Several mathematical operations are provided for combining Counter objects to produce multisets (counters that have counts greater than zero). Addition and subtraction combine counters by adding or subtracting the counts of corresponding elements."
-    text = "Canada Oil and Gas Operations Act ( R.S., 1985, c. O-7 )"
-    # analytics = analyze_string(text)
-    # analytics.print_histogram()
-    splits = split_string(text)
-    print(splits)
+    # text1 = "Canada Oil and Gas Operations Act ( R.S., 1985, c. O-7 )\n\n The following are numbers: 1.42, -3, 483, 1E-4, -23.1"
+    # text2 = "BSI created one of the world's first quality marks in 1903, when the letters 'B' and 'S' (for British Standard) were combined with V (for verification) to produce the Kitemark logo."
+    # analytics1 = analyze_text(text1)
+    # analytics2 = analyze_text(text2)
+    #
+    # analytics1.combine(analytics2)
+    # analytics1.print_histogram()
 
+    # file_text_analytics = analyze_file()
+    # file_text_analytics.print_histogram()
+
+    folder_analytics = analyze_folder()
+    # folder_analytics.print_histogram()
+    print("num texts: ", folder_analytics.num_texts)
+    print("num tokens: ", folder_analytics.analytics.num_tokens)

@@ -93,7 +93,7 @@ def save_page(folder, page, index="0"):
     if not os.path.isdir(path):
         os.mkdir(path)
     # Holds uneditted extractions
-    path_uneditted = path + "u/"
+    path_uneditted = path + paths.UNALTERED_FOLDER_NAME + "/"
     if not os.path.isdir(path_uneditted):
         os.mkdir(path_uneditted)
 

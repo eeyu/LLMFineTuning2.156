@@ -22,6 +22,12 @@ class TextAnalytics:
         for token, count in self.token_histogram.items():
             print(repr(token), count)
 
+    def get_histogram_as_string(self):
+        s = ""
+        for token, count in self.token_histogram.items():
+            s += repr(token) + " " + str(count) + "\n"
+        return s
+
     def combine(self, analytics: 'TextAnalytics'):
         self.token_histogram += analytics.token_histogram
         self.num_tokens = len(self.token_histogram)
@@ -55,7 +61,7 @@ def analyze_folder(folder_name: str | None = None) -> FolderAnalytics:
         folder_name = paths.select_file(paths.WIKIPEDIA_DATA_PATH, choose_file=False)
 
     # First get list of all files within this folder.
-    file_names = [f.path for f in os.scandir(folder_name) if f.is_file()]
+    file_names = [f.path for f in os.scandir(folder_name) if f.name.endswith("txt")]
 
     # Then get analytics of this folder
     text_analytics = TextAnalytics()
@@ -67,6 +73,12 @@ def analyze_folder(folder_name: str | None = None) -> FolderAnalytics:
     subfolder_names = [f.path for f in os.scandir(folder_name) if f.is_dir() and f.name != paths.UNALTERED_FOLDER_NAME]
     for subfolder in subfolder_names:
         folder_analytics.combine(analyze_folder(subfolder))
+
+    # Save this in a file at the selected folder.
+    with open(folder_name + "/analytics.out", "w") as f:
+        f.write("num texts: " + str(folder_analytics.num_texts))
+        f.write("\nnum tokens: " + str(folder_analytics.analytics.num_tokens))
+        f.write('\n\n' + folder_analytics.analytics.get_histogram_as_string())
 
     # Return combined analytics
     return folder_analytics

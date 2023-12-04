@@ -1,4 +1,7 @@
 **/__pycache__/**
 .idea/**
 
-/wikipedia/texts/**
+**/wikipedia/texts/**
+**/wikipedia/unaltered/**
+**/standards_txt/**
+**/FIneTuning/yu-nomi/**

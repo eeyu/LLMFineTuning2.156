@@ -1,0 +1,3 @@
+[submodule "ChatGLM3"]
+	path = ChatGLM3
+	url = git@github.com:THUDM/ChatGLM-6B.git

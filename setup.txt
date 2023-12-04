@@ -2,3 +2,9 @@ wikipedia-api
 numpy
 pandas
 matplotlib
+pip install --extra-index-url https://download.pytorch.org/whl/test/cu118 llama-recipes
+llama2 (source)
+huggingface_hub
+pip install peft
+git clone https://github.com/THUDM/ChatGLM3
+sentencepiece

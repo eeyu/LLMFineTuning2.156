@@ -9,3 +9,4 @@ datasets
 pip install peft
 git clone https://github.com/THUDM/ChatGLM3
 sentencepiece
+bitsandbytes

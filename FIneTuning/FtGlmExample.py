@@ -14,9 +14,23 @@ import paths
 
 torch.cuda.empty_cache()
 
-personal_access_token = "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"
 device = 'cuda'
-checkpoint = paths.llama_checkpoint
+
+configuration = {
+    "peft_mode": "Lora",
+    "data_size": 0.01,
+    "block_size": 128,
+    "batch_size": 16,
+    "gradient_accumulation_steps": 4
+}
+name = "yu-nomi/llama-wiki-standards"
+revision = str(configuration["peft_mode"])  \
+            + "_D" + str(configuration["data_size"])  \
+            + "_Bl" + str(configuration["block_size"])  \
+            + "_Ba" + str(configuration["batch_size"])  \
+            + "_Ga" + str(configuration["gradient_accumulation_steps"])
+print(name)
+print(revision)
 
 peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM,
                          inference_mode=False,
@@ -31,8 +45,14 @@ model = get_peft_model(model, peft_config)
 model.print_trainable_parameters()
 
 print("datasets")
-standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train[:90000]", token=paths.nomi_read_token)
-wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train[:10000]", token=paths.nomi_read_token)
+max_size = 1000000
+small_size = int(max_size * configuration["data_size"])
+standards_dataset = load_dataset(paths.standards_dataset_checkpoint,
+                                 split="train[:" + str(9*small_size) + "]",
+                                 token=paths.nomi_read_token)
+wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint,
+                            split="train[:" + str(small_size) + "]",
+                            token=paths.nomi_read_token)
 dataset = concatenate_datasets([standards_dataset, wiki_dataset])
 
 dataset = dataset.train_test_split(test_size=0.2)
@@ -58,7 +78,7 @@ tokenized_dataset = dataset.map(
     remove_columns=dataset["train"].column_names,
 )
 
-block_size = 128
+block_size = configuration["block_size"]
 
 def group_texts(examples):
     # Concatenate all texts.
@@ -83,15 +103,14 @@ lm_dataset = tokenized_dataset.map(group_texts, batched=True, num_proc=num_proc)
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 training_args = TrainingArguments(
-    output_dir="yu-nomi/llama-wiki-standards",
+    output_dir=name+"_"+revision,
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     weight_decay=0.01,
     push_to_hub=True,
     hub_token=paths.nomi_write_token,
-    per_device_train_batch_size=16,
-    # gradient_checkpointing=True,
-    gradient_accumulation_steps=4
+    per_device_train_batch_size=configuration["batch_size"],
+    gradient_accumulation_steps=configuration["gradient_accumulation_steps"]
 )
 
 trainer = Trainer(

@@ -29,8 +29,8 @@ model = get_peft_model(model, peft_config)
 model.print_trainable_parameters()
 
 print("datasets")
-standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train[:90000]", token=paths.nomi_read_token)
-wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train[:10000]", token=paths.nomi_read_token)
+standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train[:9000]", token=paths.nomi_read_token)
+wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train[:1000]", token=paths.nomi_read_token)
 dataset = concatenate_datasets([standards_dataset, wiki_dataset])
 
 # dataset = load_dataset("wikitext", "wikitext-103-v1", split="train[:5000]")
@@ -57,7 +57,7 @@ tokenized_dataset = dataset.map(
     remove_columns=dataset["train"].column_names,
 )
 
-block_size = 64
+block_size = 32
 
 def group_texts(examples):
     # Concatenate all texts.
@@ -88,7 +88,7 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     push_to_hub=True,
     hub_token=paths.nomi_write_token,
-    per_device_train_batch_size=8,
+    per_device_train_batch_size=4,
     # gradient_checkpointing=True,
     gradient_accumulation_steps=4
 )

@@ -57,7 +57,7 @@ tokenized_dataset = dataset.map(
     remove_columns=dataset["train"].column_names,
 )
 
-block_size = 128
+block_size = 4096
 
 def group_texts(examples):
     # Concatenate all texts.

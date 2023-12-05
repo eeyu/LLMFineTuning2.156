@@ -9,8 +9,10 @@ from transformers import AutoTokenizer, AutoModel
 from datasets import load_dataset, concatenate_datasets
 from transformers import DataCollatorForLanguageModeling
 from transformers import AutoModelForCausalLM, TrainingArguments, Trainer
-
+import torch
 import paths
+
+torch.cuda.empty_cache()
 
 personal_access_token = "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"
 device = 'cuda'
@@ -24,13 +26,14 @@ peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM,
 
 print("model")
 # model = AutoModelForCausalLM.from_pretrained(paths.glm_checkpoint, trust_remote_code=True, device='cuda')
-model = AutoModelForCausalLM.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
+# model = AutoModelForCausalLM.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
+model = AutoModelForCausalLM.from_pretrained(paths.llama_local_checkpoint, device_map="auto", load_in_4bit=True, torch_dtype=torch.bfloat16)
 model = get_peft_model(model, peft_config)
 model.print_trainable_parameters()
 
 print("datasets")
-standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train[:900]", token=paths.nomi_read_token)
-wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train[:100]", token=paths.nomi_read_token)
+standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train[:9000]", token=paths.nomi_read_token)
+wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train[:1000]", token=paths.nomi_read_token)
 dataset = concatenate_datasets([standards_dataset, wiki_dataset])
 
 # dataset = load_dataset("wikitext", "wikitext-103-v1", split="train[:5000]")
@@ -40,12 +43,12 @@ dataset = dataset.flatten()
 
 print("tokenizer")
 # tokenizer = AutoTokenizer.from_pretrained(paths.glm_checkpoint, trust_remote_code=True)
-tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
-
+# tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
+tokenizer = AutoTokenizer.from_pretrained(paths.llama_local_checkpoint, use_fast=True)
 # special_tokens_dict = {'pad_token': "<pad>"}
 # tokenizer.add_special_tokens(special_tokens_dict)
 tokenizer.pad_token = tokenizer.eos_token
-num_proc = 20
+num_proc = 20 # increasing increases overhead and decreases processing time. FInd equillibrium
 
 def preprocess_function(examples):
     return tokenizer([" ".join(x) for x in examples["text"]])

@@ -30,7 +30,7 @@ annie_read_token = "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"
 
 glm_checkpoint = "THUDM/chatglm3-6b"
 llama_checkpoint = "meta-llama/Llama-2-13b-chat-hf"
-llama_local_checkpoint = "/home/nomi/.cache/huggingface/hub/models--meta-llama--Llama-2-13b-chat-hf/snapshots/c2f3ec81aac798ae26dcc57799a994dfbf521496/"
+llama_local_checkpoint = "/home/yunomi/.cache/huggingface/hub/models--meta-llama--Llama-2-13b-chat-hf/snapshots/c2f3ec81aac798ae26dcc57799a994dfbf521496/"
 
 wikipedia_dataset_checkpoint = "yu-nomi/wikipedia-2.156"
 standards_dataset_checkpoint = "yu-nomi/standards-2.156"

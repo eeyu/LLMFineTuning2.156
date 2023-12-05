@@ -14,12 +14,10 @@ import paths
 
 torch.cuda.empty_cache()
 
-device = 'cuda'
-
 configuration = {
     "peft_mode": "Lora",
-    "data_size": 0.01,
-    "block_size": 128,
+    "data_size": 0.0001,
+    "block_size": 64,
     "batch_size": 16,
     "gradient_accumulation_steps": 4
 }
@@ -61,9 +59,8 @@ dataset = dataset.flatten()
 print("tokenizer")
 # tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
 tokenizer = AutoTokenizer.from_pretrained(paths.llama_local_checkpoint, use_fast=True)
-special_tokens_dict = {'pad_token': "<pad>"}
-tokenizer.add_special_tokens(special_tokens_dict)
-# tokenizer.pad_token = tokenizer.eos_token
+tokenizer.pad_token = tokenizer.eos_token #"<pad>"
+tokenizer.padding_side = "right"
 
 
 num_proc = 128 # increasing increases overhead and decreases processing time. FInd equillibrium
@@ -99,7 +96,6 @@ def group_texts(examples):
 lm_dataset = tokenized_dataset.map(group_texts, batched=True, num_proc=num_proc)
 
 
-# tokenizer.pad_token = tokenizer.eos_token
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 training_args = TrainingArguments(

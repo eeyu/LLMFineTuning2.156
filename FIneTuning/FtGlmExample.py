@@ -25,7 +25,6 @@ peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM,
                          lora_dropout=0.1)
 
 print("model")
-# model = AutoModelForCausalLM.from_pretrained(paths.glm_checkpoint, trust_remote_code=True, device='cuda')
 # model = AutoModelForCausalLM.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
 model = AutoModelForCausalLM.from_pretrained(paths.llama_local_checkpoint, device_map="auto", load_in_4bit=True, torch_dtype=torch.bfloat16)
 model = get_peft_model(model, peft_config)
@@ -42,13 +41,12 @@ dataset = dataset.flatten()
 # print(dataset['train'][0])
 
 print("tokenizer")
-# tokenizer = AutoTokenizer.from_pretrained(paths.glm_checkpoint, trust_remote_code=True)
 # tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
 tokenizer = AutoTokenizer.from_pretrained(paths.llama_local_checkpoint, use_fast=True)
-# special_tokens_dict = {'pad_token': "<pad>"}
-# tokenizer.add_special_tokens(special_tokens_dict)
-tokenizer.pad_token = tokenizer.eos_token
-num_proc = 20 # increasing increases overhead and decreases processing time. FInd equillibrium
+special_tokens_dict = {'pad_token': "<pad>"}
+tokenizer.add_special_tokens(special_tokens_dict)
+# tokenizer.pad_token = tokenizer.eos_token
+num_proc = 64 # increasing increases overhead and decreases processing time. FInd equillibrium
 
 def preprocess_function(examples):
     return tokenizer([" ".join(x) for x in examples["text"]])
@@ -60,7 +58,7 @@ tokenized_dataset = dataset.map(
     remove_columns=dataset["train"].column_names,
 )
 
-block_size = 32
+block_size = 4096
 
 def group_texts(examples):
     # Concatenate all texts.
@@ -91,7 +89,7 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     push_to_hub=True,
     hub_token=paths.nomi_write_token,
-    per_device_train_batch_size=4,
+    per_device_train_batch_size=64,
     # gradient_checkpointing=True,
     gradient_accumulation_steps=4
 )

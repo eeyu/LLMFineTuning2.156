@@ -1,6 +1,6 @@
 ## Working example of fine tuning with PEFT
 
-import loralib as lora
+# import loralib as lora
 # import lora_utils.insert_lora
 from transformers import AutoModelForSeq2SeqLM
 from peft import get_peft_config, get_peft_model, get_peft_model_state_dict, LoraConfig, TaskType

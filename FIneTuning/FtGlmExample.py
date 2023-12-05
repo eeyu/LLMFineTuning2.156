@@ -29,8 +29,8 @@ model = get_peft_model(model, peft_config)
 model.print_trainable_parameters()
 
 print("datasets")
-standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train")
-wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train")
+standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="train", token=paths.nomi_read_token)
+wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train", token=paths.nomi_read_token)
 dataset = concatenate_datasets([standards_dataset, wiki_dataset])
 
 # dataset = load_dataset("wikitext", "wikitext-103-v1", split="train[:5000]")

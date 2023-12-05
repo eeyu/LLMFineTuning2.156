@@ -46,7 +46,7 @@ tokenizer = AutoTokenizer.from_pretrained(paths.llama_local_checkpoint, use_fast
 special_tokens_dict = {'pad_token': "<pad>"}
 tokenizer.add_special_tokens(special_tokens_dict)
 # tokenizer.pad_token = tokenizer.eos_token
-num_proc = 64 # increasing increases overhead and decreases processing time. FInd equillibrium
+num_proc = 128 # increasing increases overhead and decreases processing time. FInd equillibrium
 
 def preprocess_function(examples):
     return tokenizer([" ".join(x) for x in examples["text"]])
@@ -89,7 +89,7 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     push_to_hub=True,
     hub_token=paths.nomi_write_token,
-    per_device_train_batch_size=64,
+    per_device_train_batch_size=16,
     # gradient_checkpointing=True,
     gradient_accumulation_steps=4
 )

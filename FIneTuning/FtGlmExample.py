@@ -57,7 +57,7 @@ tokenized_dataset = dataset.map(
     remove_columns=dataset["train"].column_names,
 )
 
-block_size = 64
+block_size = 128
 
 def group_texts(examples):
     # Concatenate all texts.
@@ -89,7 +89,7 @@ training_args = TrainingArguments(
     push_to_hub=True,
     hub_token=paths.nomi_write_token,
     push_to_hub_token=paths.nomi_write_token,
-    per_device_train_batch_size=8,
+    per_device_train_batch_size=64,
     # gradient_checkpointing=True,
     # gradient_accumulation_steps=4
 )

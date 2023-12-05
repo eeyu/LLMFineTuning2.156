@@ -35,10 +35,8 @@ standards_dataset = load_dataset(paths.standards_dataset_checkpoint, split="trai
 wiki_dataset = load_dataset(paths.wikipedia_dataset_checkpoint, split="train[:10000]", token=paths.nomi_read_token)
 dataset = concatenate_datasets([standards_dataset, wiki_dataset])
 
-# dataset = load_dataset("wikitext", "wikitext-103-v1", split="train[:5000]")
 dataset = dataset.train_test_split(test_size=0.2)
 dataset = dataset.flatten()
-# print(dataset['train'][0])
 
 print("tokenizer")
 # tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint, trust_remote_code=True, token=paths.annie_read_token)
@@ -46,6 +44,8 @@ tokenizer = AutoTokenizer.from_pretrained(paths.llama_local_checkpoint, use_fast
 special_tokens_dict = {'pad_token': "<pad>"}
 tokenizer.add_special_tokens(special_tokens_dict)
 # tokenizer.pad_token = tokenizer.eos_token
+
+
 num_proc = 128 # increasing increases overhead and decreases processing time. FInd equillibrium
 
 def preprocess_function(examples):
@@ -58,7 +58,7 @@ tokenized_dataset = dataset.map(
     remove_columns=dataset["train"].column_names,
 )
 
-block_size = 4096
+block_size = 128
 
 def group_texts(examples):
     # Concatenate all texts.
@@ -83,7 +83,7 @@ lm_dataset = tokenized_dataset.map(group_texts, batched=True, num_proc=num_proc)
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 training_args = TrainingArguments(
-    output_dir="yu-nomi/llama-wiki-standards",
+    output_dir="yu-nomi/llama-wiki-standards-small",
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     weight_decay=0.01,

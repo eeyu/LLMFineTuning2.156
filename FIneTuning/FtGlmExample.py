@@ -44,8 +44,8 @@ tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint, trust_remote_c
 
 # special_tokens_dict = {'pad_token': "<pad>"}
 # tokenizer.add_special_tokens(special_tokens_dict)
-# tokenizer.pad_token = tokenizer.eos_token
-num_proc = 22
+tokenizer.pad_token = tokenizer.eos_token
+num_proc = 128
 
 def preprocess_function(examples):
     return tokenizer([" ".join(x) for x in examples["text"]])

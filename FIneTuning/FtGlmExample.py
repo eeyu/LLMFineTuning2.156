@@ -83,7 +83,7 @@ lm_dataset = tokenized_dataset.map(group_texts, batched=True, num_proc=num_proc)
 data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 training_args = TrainingArguments(
-    output_dir="yu-nomi/llama-wiki-standards-small",
+    output_dir="yu-nomi/llama-wiki-standards",
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     weight_decay=0.01,

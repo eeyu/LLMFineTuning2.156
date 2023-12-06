@@ -15,9 +15,9 @@ torch.cuda.empty_cache()
 
 configuration = {
     "peft_mode": "Lora",
-    "data_size": 0.0001,
-    "block_size": 1024,
-    "batch_size": 2,
+    "data_size": 0.1,
+    "block_size": 2048,
+    "batch_size": 1,
     "gradient_accumulation_steps": 2
 }
 name = "yu-nomi/llama-wiki-standards"
@@ -55,11 +55,7 @@ model = AutoModelForCausalLM.from_pretrained(paths.llama_checkpoint,
                                              quantization_config=bnb_config,
                                              use_flash_attention_2=use_flash_attention
                                              )
-# model = AutoModelForCausalLM.from_pretrained(paths.llama_local_checkpoint,
-#                                              device_map="auto",
-#                                              use_cache=False,
-#                                              quantization_config=bnb_config,
-#                                              use_flash_attention_2=use_flash_attention)
+
 model.config.pretraining_tp = 1
 model = prepare_model_for_kbit_training(model)
 # model.print_trainable_parameters()
@@ -69,10 +65,7 @@ tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint,
                                           trust_remote_code=True,
                                           token=paths.annie_read_token,
                                           use_fast=True)
-# tokenizer = AutoTokenizer.from_pretrained(paths.llama_local_checkpoint,
-#                                           use_fast=True,
-#                                           use_reentrant=False,
-#                                           )
+
 tokenizer.pad_token = tokenizer.eos_token #"<pad>"
 tokenizer.padding_side = "right"
 
@@ -173,3 +166,12 @@ trainer = SFTTrainer(
 trainer.train()
 trainer.save_model()
 trainer.push_to_hub()
+
+model = model.merge_and_unload()
+
+merged_name = save_name+"_merged"
+print(merged_name)
+model.save_pretrained(merged_name)
+
+model.push_to_hub(merged_name, use_auth_token=paths.nomi_write_token)
+tokenizer.push_to_hub(merged_name, use_auth_token=paths.nomi_write_token)

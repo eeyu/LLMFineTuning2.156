@@ -24,7 +24,15 @@ save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2_merged"
 # prompt = "At the sending end, the Synchronization and Channel Coding Sublayer accepts"
 # prompt = "When attaching window panels to an aircraft, "
 # prompt = "To create a linear rail with minimal backlash, "
-prompt = "Certain cryptographic devices and technical data regarding"
+prompt = "How do I comply with DOE regulations for hazards?"
+prompt = """
+<s>[INST] <<SYS>>
+    You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+    
+    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+    <</SYS>>
+""" + prompt + "[/INST]"
+
 max_new_tokens = 2048
 
 
@@ -78,7 +86,7 @@ output_parameters_list = {
         "top_p": 0.18
     }
 }
-output_parameters = output_parameters_list["sphinx"]
+output_parameters = output_parameters_list["precise"]
 
 print("Input: ", prompt)
 model_inputs = tokenizer(prompt, return_tensors="pt").to("cuda:0")
@@ -98,4 +106,8 @@ output = model.generate(**model_inputs,
 #   print("{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))
 
 for i in range(len(output)):
-    print(tokenizer.decode(output[i], skip_special_tokens=True))
+    text = tokenizer.decode(output[i], skip_special_tokens=True)
+    answer_index = text.find("[/INST]") + 8
+    print(text[answer_index:])
+
+

@@ -15,15 +15,16 @@ torch.cuda.empty_cache()
 
 configuration = {
     "peft_mode": "Lora",
-    "data_size": 0.1,
-    "block_size": 2048,
-    "batch_size": 1,
-    "gradient_accumulation_steps": 2
+    "data_size": 0.01,
+    "block_size": 1024,
+    "batch_size": 16,
+    "gradient_accumulation_steps": 4
 }
 name = "yu-nomi/llama-wiki-standards"
 revision = str(configuration["peft_mode"])  \
             + "_D" + str(configuration["data_size"])  \
-            + "_Bl" + str(configuration["block_size"])
+            + "_Bl" + str(configuration["block_size"]) \
+            + "_PAD"
             # + "_Ba" + str(configuration["batch_size"])  \
             # + "_Ga" + str(configuration["gradient_accumulation_steps"])
 print(name)
@@ -66,8 +67,10 @@ tokenizer = AutoTokenizer.from_pretrained(paths.llama_checkpoint,
                                           token=paths.annie_read_token,
                                           use_fast=True)
 
-tokenizer.pad_token = tokenizer.eos_token #"<pad>"
+tokenizer.pad_token = "<pad>" #tokenizer.eos_token #"<pad>"
+# TODO This pad token choice might have messed things up
 tokenizer.padding_side = "right"
+
 
 print("datasets")
 max_size = 1000000
@@ -88,38 +91,6 @@ block_size = configuration["block_size"]
 
 
 num_proc = 128 # increasing increases overhead and decreases processing time. FInd equillibrium
-
-# def preprocess_function(examples):
-#     return tokenizer([" ".join(x) for x in examples["text"]])
-#
-# tokenized_dataset = dataset.map(
-#     preprocess_function,
-#     batched=True,
-#     num_proc=num_proc,
-#     remove_columns=dataset["train"].column_names,
-# )
-#
-#
-# def group_texts(examples):
-#     # Concatenate all texts.
-#     concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
-#     total_length = len(concatenated_examples[list(examples.keys())[0]])
-#     # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
-#     # customize this part to your needs.
-#     if total_length >= block_size:
-#         total_length = (total_length // block_size) * block_size
-#     # Split by chunks of block_size.
-#     result = {
-#         k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
-#         for k, t in concatenated_examples.items()
-#     }
-#     result["labels"] = result["input_ids"].copy()
-#     return result
-#
-# lm_dataset = tokenized_dataset.map(group_texts, batched=True, num_proc=num_proc)
-#
-#
-# data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
 
 training_args = TrainingArguments(
     output_dir=save_name,

@@ -13,7 +13,6 @@ import paths
 torch.cuda.empty_cache()
 
 
-
 configuration = {
     "peft_mode": "Lora",
     "data_size": 0.01,
@@ -24,9 +23,9 @@ configuration = {
 name = "yu-nomi/llama-wiki-standards"
 revision = str(configuration["peft_mode"])  \
             + "_D" + str(configuration["data_size"])  \
-            + "_Bl" + str(configuration["block_size"])  \
-            + "_Ba" + str(configuration["batch_size"])  \
-            + "_Ga" + str(configuration["gradient_accumulation_steps"])
+            + "_Bl" + str(configuration["block_size"])
+            # + "_Ba" + str(configuration["batch_size"])  \
+            # + "_Ga" + str(configuration["gradient_accumulation_steps"])
 print(name)
 print(revision)
 save_name = name+"_"+revision

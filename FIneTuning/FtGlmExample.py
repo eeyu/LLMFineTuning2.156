@@ -1,4 +1,4 @@
-## Working example of fine tuning with PEFT
+## Outdated
 
 # import loralib as lora
 # import lora_utils.insert_lora

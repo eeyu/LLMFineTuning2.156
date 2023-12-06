@@ -40,24 +40,6 @@ if not USE_TRAINED:
 
 else:
     print("Using Trained")
-    # Trained
-    # configuration = {
-    #     "peft_mode": "Lora",
-    #     "data_size": 0.0001,
-    #     "block_size": 1024,
-    #     "batch_size": 6,
-    #     "gradient_accumulation_steps": 2
-    # }
-    # name = "yu-nomi/llama-wiki-standards"
-    # revision = str(configuration["peft_mode"])  \
-    #             + "_D" + str(configuration["data_size"])  \
-    #             + "_Bl" + str(configuration["block_size"])  \
-    #             + "_Ba" + str(configuration["batch_size"])  \
-    #             + "_Ga" + str(configuration["gradient_accumulation_steps"])
-    # print(name)
-    # print(revision)
-    # save_name = name+"_"+revision
-
     # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.0001_Bl1024_Ba6_Ga2"
     save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl128_Ba16_Ga4"
     model = AutoPeftModelForCausalLM.from_pretrained(
@@ -67,6 +49,7 @@ else:
         low_cpu_mem_usage=True,
         quantization_config=bnb_config,
         use_cache=False,
+        # _configuration_file="adapter_config.json"
     )
     tokenizer = AutoTokenizer.from_pretrained(save_name)
 

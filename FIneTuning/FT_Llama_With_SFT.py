@@ -15,7 +15,7 @@ torch.cuda.empty_cache()
 
 configuration = {
     "peft_mode": "Lora",
-    "data_size": 0.01,
+    "data_size": 0.0001,
     "block_size": 1024,
     "batch_size": 2,
     "gradient_accumulation_steps": 2

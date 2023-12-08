@@ -10,21 +10,22 @@ torch.cuda.empty_cache()
 
 
 ## Adapter
-# USE_ADAPTER = True
+USE_ADAPTER = True
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.0001_Bl1024"
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2"
+save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_PAD"
 
 ## No Adapter
-USE_ADAPTER = False
-save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2_merged"
+# USE_ADAPTER = False
+# save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2_merged"
 # save_name = paths.llama_local_checkpoint
 
 # prompt = "The NASA standard 5002A is"
-# prompt = "A method of determining Sound Power Level"
+prompt = "A method of determining Sound Power Level"
 # prompt = "At the sending end, the Synchronization and Channel Coding Sublayer accepts"
 # prompt = "When attaching window panels to an aircraft, "
 # prompt = "To create a linear rail with minimal backlash, "
-prompt = "Certain cryptographic devices and technical data regarding"
+# prompt = "Certain cryptographic devices and technical data regarding"
 max_new_tokens = 2048
 
 
@@ -93,6 +94,7 @@ output = model.generate(**model_inputs,
                         num_beams=3,
                         no_repeat_ngram_size=5
                         )
+
 
 # for i, sample_output in enumerate(output):
 #   print("{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))

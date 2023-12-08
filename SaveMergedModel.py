@@ -15,7 +15,7 @@ torch.cuda.empty_cache()
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.0001_Bl1024_Ba6_Ga2"
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl128_Ba16_Ga4"
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.0001_Bl1024"
-save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2"
+save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_PAD"
 model = AutoPeftModelForCausalLM.from_pretrained(
     save_name,
     trust_remote_code=True,

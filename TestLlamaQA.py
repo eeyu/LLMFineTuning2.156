@@ -5,6 +5,7 @@ from peft import get_peft_config, get_peft_model, get_peft_model_state_dict, Lor
 from peft import AutoPeftModelForCausalLM
 import torch
 from transformers import AutoTokenizer, BitsAndBytesConfig
+from EvaluateQuestions import generate_new_test_prompts
 
 torch.cuda.empty_cache()
 
@@ -12,16 +13,16 @@ import getQAPrompt as qa
 
 
 ## Adapter
-USE_ADAPTER = True
+# USE_ADAPTER = True
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.0001_Bl1024"
-save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2"
+# save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2"
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_PAD"
 #
 
 ## No Adapter
-# USE_ADAPTER = False
+USE_ADAPTER = False
 # save_name = "yu-nomi/llama-wiki-standards_Lora_D0.01_Bl1024_Ba2_Ga2_merged"
-# save_name = paths.llama_local_checkpoint
+save_name = paths.llama_local_checkpoint
 
 # prompt = "What tolerance do I need when building a commercial 3D printer?"
 # prompt = "What standard pertains for screws on aircraft"
@@ -114,10 +115,15 @@ def get_response(prompt):
         text = tokenizer.decode(output[i], skip_special_tokens=True)
         # answer_index = text.find("[/INST]") + 8
         # print(text[answer_index:])
-        print(text)
+        response_ind = text.find("Response")
+        print(text[response_ind:])
 
 
+new_prompts, new_answers = generate_new_test_prompts()
 # get_response(prompt)
 for i in range(10):
-    prompt = qa.get_question(i, keep_context=True)
+    prompt = new_prompts[i]
+    # prompt = qa.get_question(i, keep_context=True)
     get_response(prompt)
+    print("Correct: ", new_answers[i])
+    print("="*400)
